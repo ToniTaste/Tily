@@ -1,0 +1,122 @@
+html, body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #f9f9f9;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  margin: .5rem;
+  font-size: 1.3rem;
+  text-align: left;
+}
+
+/* obere Einstellungszeile */
+#settingsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  background: #fafafa;
+}
+#settingsRow button {
+  padding: .3rem .6rem;
+  border: 1px solid #999;
+  border-radius: 4px;
+  background: #eee;
+  cursor: pointer;
+}
+#settingsRow button:hover { background: #ddd; }
+
+/* Hauptlayout: Blockly – Controls – Canvas */
+#mainLayout {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  gap: .25rem;
+  padding: 0 .5rem;
+  overflow: hidden;
+}
+
+/* Blockly links */
+#blocklyDiv {
+  flex: 2 1 0;
+  min-width: 400px;
+  max-width: 700px;
+  border: 1px solid #ccc;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+/* Steuerung mittig */
+#controls {
+  flex: 0 0 60px;   /* schmale Spalte */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Slider hochkant */
+.slider-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  height: 180px;
+  margin-bottom: 1.5rem;
+}
+#timeoutSlider {
+  writing-mode: bt-lr;
+  -webkit-appearance: slider-vertical;
+  width: 8px;
+  height: 120px;
+}
+.speed-icon { font-size: 1.2rem; }
+
+/* Quadratische Buttons */
+#controls button {
+  width: 48px;
+  height: 48px;
+  font-size: 1.2rem;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #eee;
+  cursor: pointer;
+}
+#controls button:hover { background: #ddd; }
+
+/* Canvas rechts */
+#tileCanvas {
+  align-self: flex-start;       /* Canvas bleibt oben in der Spalte */
+  border: 1px solid #ccc;
+  background: #fff;
+  display: block;
+  image-rendering: pixelated;   /* klare Kanten */
+  width: auto;                  /* keine Verzerrung */
+  height: auto;
+}
+
+/* Untere Buttonreihe */
+#bottomControls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  background: #fafafa;
+}
+#bottomControls button {
+  flex: 0 0 auto;
+  width: 180px;
+  padding: .4rem .6rem;
+  border: 1px solid #999;
+  border-radius: 4px;
+  background: #eee;
+  text-align: center;
+  height: 40px;
+}
+#bottomControls button:hover { background: #ddd; }
