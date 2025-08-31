@@ -1,4 +1,4 @@
-# 🟥 Tily - Die blockbasieete Fliesenlegerin
+# 🟥 Tily - Die blockbasierte Fliesenlegerin
 
 Lege Fliesen mithilfe der blockbasierten Programmierung. Nutzer:innen können über Blöcke einen Roboter steuern, der Fliesen legt und so Pixelbilder zeichnen.
 
