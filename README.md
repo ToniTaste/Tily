@@ -11,7 +11,7 @@ Lege Fliesen mithilfe der blockbasierten Programmierung. Nutzer:innen können ü
 
 ## 🖼️ Screenshot
 
-![Screenshot der Benutzeroberfläche](img/Tily.png)
+![Screenshot der Benutzeroberfläche](Tily.png)
 
 ## 🚀 Online ausprobieren
 
