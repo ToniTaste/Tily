@@ -17,7 +17,7 @@ Lege Fliesen mithilfe der blockbasierten Programmierung. Nutzer:innen können ü
 
 > Wird unterstützt durch **GitHub Pages**.
 
-👉 [Hier klicken, um das Projekt direkt im Browser zu starten](https://ToniTaste.github.io/Laby/)
+👉 [Hier klicken, um das Projekt direkt im Browser zu starten](https://tonitaste.github.io/Tily/)
 
 ## 📦 Installation (lokal)
 
