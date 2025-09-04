@@ -98,6 +98,8 @@ h1 {
   image-rendering: pixelated;   /* klare Kanten */
   width: auto;                  /* keine Verzerrung */
   height: auto;
+  max-width: 100%;              /* passt sich Elternbreite an */
+  max-height: 100%;
 }
 
 /* Untere Buttonreihe */

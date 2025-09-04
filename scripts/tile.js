@@ -13,43 +13,45 @@
   function mod(a, n){ return ((a % n) + n) % n; }
 
   class Board {
-  constructor(canvas, rows, cols){
-  this.canvas = canvas;
-  this.ctx = this.canvas.getContext("2d"); // <<< WICHTIG!
-  this.rows = rows;
-  this.cols = cols;
-  this.margin = 0;
-  this.cellW = this.cellH = 10;
-  this.pieceR = 4;
-  this.computeGeometry();
-}
+    constructor(canvas, rows, cols, opts = {}){
+      this.canvas = canvas;
+      this.ctx = this.canvas.getContext("2d"); // <<< WICHTIG!
+      this.rows = rows;
+      this.cols = cols;
+      const {maxSize = 480, scale = 0.95, margin = 8} = opts;
+      this.maxSize = maxSize;
+      this.scale = scale;
+      this.margin = margin;
+      this.cellW = this.cellH = 10;
+      this.pieceR = 4;
+      this.computeGeometry();
+    }
 
 
-  computeGeometry(){
-  // Platz im Layout abfragen
-  const parentW = this.canvas.parentElement.clientWidth || 500;
-  const parentH = this.canvas.parentElement.clientHeight || 500;
+    computeGeometry(){
+      // Platz im Layout abfragen
+      const parentW = this.canvas.parentElement.clientWidth || 500;
+      const parentH = this.canvas.parentElement.clientHeight || 500;
 
-  // Maximal erlaubte Canvas-Kantenlänge
-  const MAX_SIZE = 500;
+      // verfügbare Breite/Höhe (durch Layout, Skalierung und Maximalgröße)
+      const limitW = Math.min(parentW, this.maxSize) * this.scale;
+      const limitH = Math.min(parentH, this.maxSize) * this.scale;
+      const availW = Math.max(0, limitW - this.margin * 2);
+      const availH = Math.max(0, limitH - this.margin * 2);
 
-  // tatsächlich verfügbare Breite/Höhe (durch Layout UND Maximalgröße)
-  const availW = Math.min(parentW, MAX_SIZE);
-  const availH = Math.min(parentH, MAX_SIZE);
+      // Zellgröße so bestimmen, dass Quadrate entstehen
+      const cellW = Math.floor(availW / this.cols);
+      const cellH = Math.floor(availH / this.rows);
+      const size = Math.max(1, Math.min(cellW, cellH));
 
-  // Zellgröße so bestimmen, dass Quadrate entstehen
-  const cellW = Math.floor(availW / this.cols);
-  const cellH = Math.floor(availH / this.rows);
-  const size = Math.max(1, Math.min(cellW, cellH));
+      this.cellW = this.cellH = size;
 
-  this.cellW = this.cellH = size;
+      // Canvas-Pixelgröße entsprechend setzen
+      this.canvas.width  = this.cols * size + this.margin * 2;
+      this.canvas.height = this.rows * size + this.margin * 2;
 
-  // Canvas-Pixelgröße entsprechend setzen
-  this.canvas.width  = this.cols * size;
-  this.canvas.height = this.rows * size;
-
-  this.pieceR = size * 0.35;
-}
+      this.pieceR = size * 0.35;
+    }
 
 
     setGrid(r,c){
@@ -181,9 +183,13 @@
   }
 
   const Tily=window.Tily||(window.Tily={});
-  function getBoard(){ 
-    if(!Tily._board){Tily._board=new Board(document.getElementById("tileCanvas"),15,15);} 
-    return Tily._board; 
+  function getBoard(){
+    if(!Tily._board){
+      const canvas = document.getElementById("tileCanvas");
+      const opts = Tily.boardOpts || {};
+      Tily._board = new Board(canvas,15,15,opts);
+    }
+    return Tily._board;
   }
 
   window.tile_go=(dir,s,ms)=>getBoard().go(dir,s,ms);
