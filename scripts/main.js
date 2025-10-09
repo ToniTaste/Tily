@@ -43,7 +43,7 @@
     const ws = window.workspace;
     if (!ws.getTopBlocks(true).some(b => b.type === 'tile_start')){
       const start = ws.newBlock('tile_start');
-      start.initSvg(); start.render(); start.moveBy(30, 30);
+      start.initSvg(); start.render(); start.moveBy(30, 30); start.setDeletable(false); 
     }
   }
 
