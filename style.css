@@ -70,8 +70,8 @@ h1 {
   margin-bottom: 1.5rem;
 }
 #timeoutSlider {
-  writing-mode: bt-lr;
-  -webkit-appearance: slider-vertical;
+  writing-mode: vertical-lr; 
+  direction: rtl;
   width: 8px;
   height: 120px;
 }
@@ -122,3 +122,4 @@ h1 {
   height: 40px;
 }
 #bottomControls button:hover { background: #ddd; }
+
