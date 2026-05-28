@@ -1,6 +1,6 @@
 // generator.js
 Blockly.JavaScript.forBlock['tile_start'] = function (block, generator) {
-  return generator.statementToCode(block, 'NEXT');
+  return '';
 };
 
 Blockly.JavaScript.forBlock['tile_go'] = function (block, generator) {

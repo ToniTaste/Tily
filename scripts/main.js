@@ -24,6 +24,22 @@
     setBlocklyEnabled(!flag);
   }
 
+  const tilyTheme = Blockly.Theme.defineTheme('tilyTheme', {
+    base: Blockly.Themes.Classic,
+    blockStyles: {
+      start_blocks: {
+        colourPrimary: '#FFBF00',
+        hat: 'cap'
+      },
+      command_blocks: {
+      colourPrimary: '#4C97FF'
+      },
+    loop_blocks: {
+      colourPrimary: '#FFAB19'
+      }
+    }
+  });
+
   // ---------- Blockly ----------
   window.initBlockly = function(){
     const blocklyDiv = getEl('blocklyDiv');
@@ -34,18 +50,30 @@
       zoom: { controls: true, wheel: false, startScale: 0.9 },
       scrollbars: true,
       renderer: 'zelos',
-      theme: Blockly.Themes.Classic
+      theme: tilyTheme
     });
     ensureStartBlock();
     window.addEventListener('resize', ()=> Blockly.svgResize(window.workspace));
   };
-  function ensureStartBlock(){
-    const ws = window.workspace;
-    if (!ws.getTopBlocks(true).some(b => b.type === 'tile_start')){
-      const start = ws.newBlock('tile_start');
-      start.initSvg(); start.render(); start.moveBy(30, 30); start.setDeletable(false); 
-    }
+  function ensureStartBlock() {
+  const ws = window.workspace;
+  if (!ws) return;
+
+  const starts = ws.getAllBlocks(false).filter(b => b.type === 'tile_start');
+
+  if (starts.length === 0) {
+    const start = ws.newBlock('tile_start');
+    start.initSvg();
+    start.render();
+    start.moveBy(30, 30);
+    start.setDeletable(false);
+    return;
   }
+
+  starts.forEach(start => {
+    start.setDeletable(false);
+  });
+}
 
   // ---------- enroll ----------
   function enroll(block, arr, fn){
@@ -78,17 +106,43 @@
           while(b){ collectStepsFromBlock(b, arr); b=b.getNextBlock(); }
         }
       } break;
-      case 'tile_start': {
-        let b = block.getInputTargetBlock('NEXT');
-        while(b){ collectStepsFromBlock(b, arr); b=b.getNextBlock(); }
-      } break;
+      case 'tile_start': 
+        //Der Startblock erzeugt keinen Schritt		
+	  break;
     }
   }
-  function buildSteps(){
-    const start = workspace.getTopBlocks(true).find(b => b.type==='tile_start');
-    if (!start){ alert("⚠️ Kein Start-Block vorhanden."); return []; }
-    const steps=[]; collectStepsFromBlock(start, steps); return steps;
+  
+  function getStartBlock() {
+  const starts = workspace.getAllBlocks(false)
+    .filter(b => b.type === 'tile_start');
+
+  if (starts.length === 0) {
+    alert("⚠️ Kein Startblock vorhanden.");
+    return null;
   }
+
+  if (starts.length > 1) {
+    alert("⚠️ Es gibt mehrere Startblöcke.");
+    return null;
+  }
+
+  return starts[0];
+}
+  
+  function buildSteps() {
+  const start = getStartBlock();
+  if (!start) return [];
+
+  const steps = [];
+
+  let b = start.getNextBlock();
+  while (b) {
+    collectStepsFromBlock(b, steps);
+    b = b.getNextBlock();
+  }
+
+  return steps;
+}
 
   // ---------- Runner ----------
   function getDelayMs(){
@@ -116,25 +170,64 @@
         break;
     }
   }
-  async function runQueue(){
-    if (running) return; running = true;
-    while(queue.length){ await doStep(queue.shift()); }
-    running = false;
+  async function runQueue() {
+  if (running) return;
+
+  running = true;
+
+  try {
+    while (queue.length) {
+      await doStep(queue.shift());
+    }
+
     alert("✅ Das Programm ist beendet.");
+  } catch (e) {
+    alert("❌ Fehler im Programm:\n" + e.message);
+  } finally {
+    running = false;
+    workspace?.highlightBlock(null);
   }
+}
 
   // ---------- Public Run Controls ----------
-  window.startRun = function(){
+  window.startRun = function() {
+  if (running) return;
+
+  if (window.tile_apply_start) window.tile_apply_start();
+
+  queue = buildSteps();
+
+  if (queue.length === 0) {
+    alert("⚠️ Das Programm enthält keine ausführbaren Blöcke.");
+    return;
+  }
+
+  runQueue();
+};
+  window.startStep = async function() {
+  if (running) return;
+
+  if (!queue.length) {
     if (window.tile_apply_start) window.tile_apply_start();
-    queue = buildSteps(); runQueue();
-  };
-  window.startStep = async function(){
-    if (!queue.length){ if (window.tile_apply_start) window.tile_apply_start(); queue=buildSteps(); }
-    const step = queue.shift(); if (step) await doStep(step);
-    if (!queue.length){
-      alert("✅ Das Programm ist beendet.");
+    queue = buildSteps();
+
+    if (queue.length === 0) {
+      alert("⚠️ Das Programm enthält keine ausführbaren Blöcke.");
+      return;
     }
-  };
+  }
+
+  const step = queue.shift();
+
+  if (step) {
+    await doStep(step);
+  }
+
+  if (!queue.length) {
+    workspace?.highlightBlock(null);
+    alert("✅ Das Programm ist beendet.");
+  }
+};
   window.stoppAll = function(){
     queue.length=0; running=false; workspace?.highlightBlock(null);
     if (window.tile_apply_start) window.tile_apply_start();

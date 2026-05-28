@@ -4,14 +4,11 @@ Blockly.defineBlocksWithJsonArray([
   {
     "type": "tile_start",
     "message0": "Start",
-    "message1": "%1",
-    "args1": [
-      { "type": "input_statement", "name": "NEXT" }
-    ],
-    "colour": "#FFBF00",
+    "message0": "Start",
+    "nextStatement": null,
+    "style": "start_blocks",
     "tooltip": "Startpunkt des Programms. Nur die Befehle im Startblock werden ausgeführt.",
-    "helpUrl": "",
-    "deletable": false
+    "helpUrl": ""
   },
   {
     "type": "tile_go",
