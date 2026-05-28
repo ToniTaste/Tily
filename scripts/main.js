@@ -1,24 +1,39 @@
 /**
  * main.js — Blockly-Init + Runner + Save/Load + Settings-Toggle
  */
-let queue = [];
-let running = false;
-let runToken = 0;
-const MAX_EXECUTION_STEPS = 5000;
 
 (function () {
     "use strict";
 
     window.workspace = window.workspace || null;
-    const DEFAULT_ROWS = 15,
-    DEFAULT_COLS = 15;
+    const DEFAULT_ROWS = 15;
+    const DEFAULT_COLS = 15;
+
+    const MIN_ROWS = 1;
+    const MIN_COLS = 1;
+    const MAX_ROWS = 60;
+    const MAX_COLS = 60;
+
+    const MAX_EXECUTION_STEPS = 5000;
+
     let queue = [];
     let running = false;
+    let runToken = 0;
 
     // ---------- UI Helpers ----------
     function getEl(id) {
         return document.getElementById(id);
     }
+    function clampNumber(value, min, max, fallback) {
+        const n = parseInt(value, 10);
+
+        if (!Number.isFinite(n)) {
+            return fallback;
+        }
+
+        return Math.min(max, Math.max(min, n));
+    }
+
     function disable(el, flag) {
         if (el)
             el.disabled = !!flag;
@@ -329,6 +344,10 @@ const MAX_EXECUTION_STEPS = 5000;
         blocks.forEach((block, i) => block.setAttribute('id', `b${i}_${Date.now()}`));
     }
     function saveProgram() {
+        const start = getStartBlock();
+        if (!start) {
+            return;
+        }
         const xml = Blockly.Xml.workspaceToDom(workspace);
         const settings = document.createElement("settings");
         const b = window.Tily?._board;
@@ -361,13 +380,48 @@ const MAX_EXECUTION_STEPS = 5000;
                 alert("❌ Fehler beim Parsen der Datei:\n" + e.message);
                 return;
             }
+            const blocks = xmlDom.querySelectorAll('block');
+            if (blocks.length === 0) {
+                alert("⚠️ Die Datei enthält keine Blöcke.");
+                return;
+            }
 
+            const startBlocks = xmlDom.querySelectorAll('block[type="tile_start"]');
+
+            if (startBlocks.length === 0) {
+                alert("⚠️ Die Datei enthält keinen Startblock.");
+                return;
+            }
+
+            if (startBlocks.length > 1) {
+                alert("⚠️ Die Datei enthält mehrere Startblöcke.");
+                return;
+            }
             const settings = xmlDom.querySelector("settings");
             if (settings) {
-                const rows = parseInt(settings.getAttribute("rows") || DEFAULT_ROWS, 10);
-                const cols = parseInt(settings.getAttribute("cols") || DEFAULT_COLS, 10);
-                const startRow = parseInt(settings.getAttribute("startrow") || 0, 10);
-                const startCol = parseInt(settings.getAttribute("startcol") || 0, 10);
+                const rows = clampNumber(
+                        settings.getAttribute("rows"),
+                        MIN_ROWS,
+                        MAX_ROWS,
+                        DEFAULT_ROWS);
+
+                const cols = clampNumber(
+                        settings.getAttribute("cols"),
+                        MIN_COLS,
+                        MAX_COLS,
+                        DEFAULT_COLS);
+
+                const startRow = clampNumber(
+                        settings.getAttribute("startrow"),
+                        0,
+                        rows - 1,
+                        0);
+
+                const startCol = clampNumber(
+                        settings.getAttribute("startcol"),
+                        0,
+                        cols - 1,
+                        0);
 
                 if (window.tile_set_grid)
                     window.tile_set_grid(rows, cols);
@@ -396,6 +450,19 @@ const MAX_EXECUTION_STEPS = 5000;
             workspace.clear();
             Blockly.Xml.domToWorkspace(xmlDom, workspace);
             ensureStartBlock();
+            const startBlock = getStartBlock();
+            if (startBlock) {
+                startBlock.setDeletable(false);
+            }
+
+            queue.length = 0;
+            running = false;
+            runToken++;
+            workspace?.highlightBlock(null);
+
+            if (window.tile_apply_start) {
+                window.tile_apply_start();
+            }
         };
         reader.readAsText(file);
     }
