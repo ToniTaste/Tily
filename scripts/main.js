@@ -34,22 +34,6 @@
         return Math.min(max, Math.max(min, n));
     }
 
-    function disable(el, flag) {
-        if (el)
-            el.disabled = !!flag;
-    }
-    function setBlocklyEnabled(flag) {
-        const div = getEl('blocklyDiv');
-        if (!div)
-            return;
-        div.style.pointerEvents = flag ? 'auto' : 'none';
-        div.style.opacity = flag ? '1' : '0.6';
-    }
-    function lockProgram(flag) {
-        ['btnStart', 'btnStop', 'btnStep', 'btnReset', 'btnLoad', 'btnSave']
-        .forEach(id => disable(getEl(id), flag));
-        setBlocklyEnabled(!flag);
-    }
 
     const tilyTheme = Blockly.Theme.defineTheme('tilyTheme', {
         base: Blockly.Themes.Classic,
@@ -473,11 +457,12 @@
         if (window.tile_reset)
             window.tile_reset();
         window.initBlockly();
-        lockProgram(false);
 
         // Werte aus HTML übernehmen (oder Default)
-        let rows = parseInt(getEl('rows').value, 10) || DEFAULT_ROWS;
-        let cols = parseInt(getEl('cols').value, 10) || DEFAULT_COLS;
+        let rows = clampNumber(getEl('rows').value, MIN_ROWS, MAX_ROWS, DEFAULT_ROWS);
+		let cols = clampNumber(getEl('cols').value, MIN_COLS, MAX_COLS, DEFAULT_COLS);
+		getEl('rows').value = rows;
+		getEl('cols').value = cols;
         let startVal = getEl('startSelect').value || "tl";
 
         if (window.tile_set_grid)

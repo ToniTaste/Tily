@@ -1,4 +1,7 @@
 // generator.js
+// Wird derzeit nicht für die Programmausführung verwendet.
+// Die Ausführung erfolgt über die Queue-Logik in main.js.
+
 Blockly.JavaScript.forBlock['tile_start'] = function (block, generator) {
   return '';
 };

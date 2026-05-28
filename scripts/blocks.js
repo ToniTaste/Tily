@@ -4,9 +4,10 @@ Blockly.defineBlocksWithJsonArray([
   {
     "type": "tile_start",
     "message0": "Start",
+    "message0": "Start",
     "nextStatement": null,
     "style": "start_blocks",
-    "tooltip": "Startpunkt des Programms. Nur die Befehle im Startblock werden ausgeführt.",
+    "tooltip": "Startpunkt des Programms.",
     "helpUrl": ""
   },
   {
