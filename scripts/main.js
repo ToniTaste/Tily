@@ -76,41 +76,52 @@
 }
 
   // ---------- enroll ----------
-  function enroll(block, arr, fn){
-    if (!block) return;
-    const id = block.id;
-    arr.push({type:'highlight', id});
-    fn(block, arr);
-    arr.push({type:'unhighlight', id});
-  }
+  function addCommandStep(block, arr, data) {
+  if (!block) return;
+  arr.push({
+    id: block.id,
+    ...data
+  });
+}
 
   // ---------- Step Collection ----------
-  function collectStepsFromBlock(block, arr){
-    if (!block) return;
-    switch(block.type){
-      case 'tile_go':
-        enroll(block, arr, (b,a)=> {
-          a.push({type:'go', dir:b.getFieldValue('DIR')});
-        });
-        break;
-      case 'tile_fill':
-        enroll(block, arr, (b,a)=> {
-          a.push({type:'fill', color:b.getFieldValue('COLOR')||'#ffd54f'});
-        });
-        break;
-      case 'custom_repeat': {
-        const times = Math.max(0, Math.floor(block.getFieldValue('TIMES')||0));
-        const first = block.getInputTargetBlock('DO');
-        for(let i=0;i<times;i++){
-          let b=first;
-          while(b){ collectStepsFromBlock(b, arr); b=b.getNextBlock(); }
+  function collectStepsFromBlock(block, arr) {
+  if (!block) return;
+
+  switch (block.type) {
+    case 'tile_go':
+      addCommandStep(block, arr, {
+        type: 'go',
+        dir: block.getFieldValue('DIR')
+      });
+      break;
+
+    case 'tile_fill':
+      addCommandStep(block, arr, {
+        type: 'fill',
+        color: block.getFieldValue('COLOR') || '#ffd54f'
+      });
+      break;
+
+    case 'custom_repeat': {
+      const times = Math.max(0, Math.floor(block.getFieldValue('TIMES') || 0));
+      const first = block.getInputTargetBlock('DO');
+
+      for (let i = 0; i < times; i++) {
+        let b = first;
+        while (b) {
+          collectStepsFromBlock(b, arr);
+          b = b.getNextBlock();
         }
-      } break;
-      case 'tile_start': 
-        //Der Startblock erzeugt keinen Schritt		
-	  break;
+      }
+      break;
     }
+
+    case 'tile_start':
+      // Der Startblock erzeugt selbst keinen Schritt.
+      break;
   }
+}
   
   function getStartBlock() {
   const starts = workspace.getAllBlocks(false)
@@ -151,25 +162,27 @@
     const ms = Math.round((100 - v) * 2); // rechts=0ms
     return Math.max(0, ms);
   }
-  async function doStep(step){
-    const delay = getDelayMs();
-    switch(step.type){
-      case 'highlight':
-        workspace?.highlightBlock(step.id);
-        if (delay>0) await new Promise(r=>setTimeout(r, delay/2));
-        break;
-      case 'unhighlight':
-        workspace?.highlightBlock(null);
-        break;
-      case 'go':
-        await window.tile_go(step.dir, 1, delay);
-        break;
-      case 'fill':
-        window.tile_fill(step.color);
-        if (delay>0) await new Promise(r=>setTimeout(r, delay/2));
-        break;
-    }
+  async function doStep(step) {
+  const delay = getDelayMs();
+
+  if (step.id) {
+    workspace?.highlightBlock(step.id);
   }
+
+  switch (step.type) {
+    case 'go':
+      await window.tile_go(step.dir, 1, delay);
+      break;
+
+    case 'fill':
+      window.tile_fill(step.color);
+      if (delay > 0) {
+        await new Promise(r => setTimeout(r, delay));
+      }
+      break;
+  }
+}
+
   async function runQueue() {
   if (running) return;
 
@@ -212,6 +225,7 @@
     queue = buildSteps();
 
     if (queue.length === 0) {
+      workspace?.highlightBlock(null);
       alert("⚠️ Das Programm enthält keine ausführbaren Blöcke.");
       return;
     }
@@ -224,10 +238,11 @@
   }
 
   if (!queue.length) {
-    workspace?.highlightBlock(null);
     alert("✅ Das Programm ist beendet.");
+    workspace?.highlightBlock(null);
   }
 };
+
   window.stoppAll = function(){
     queue.length=0; running=false; workspace?.highlightBlock(null);
     if (window.tile_apply_start) window.tile_apply_start();
