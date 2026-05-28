@@ -530,13 +530,18 @@
             start.disabled = true;
             btn.textContent = "✏️ Bearbeiten";
 
-            const r = parseInt(rows.value, 10) || DEFAULT_ROWS;
-            const c = parseInt(cols.value, 10) || DEFAULT_COLS;
+            const r = clampNumber(rows.value, MIN_ROWS, MAX_ROWS, DEFAULT_ROWS);
+            const c = clampNumber(cols.value, MIN_COLS, MAX_COLS, DEFAULT_COLS);
+
+            rows.value = r;
+            cols.value = c;
+
             if (window.tile_set_grid)
                 window.tile_set_grid(r, c);
 
             let rr = 0,
             cc = 0;
+
             switch (start.value) {
             case "tl":
                 rr = 0;
@@ -560,8 +565,13 @@
                 cc = Math.floor(c / 2);
                 break;
             }
+
+            rr = clampNumber(rr, 0, r - 1, 0);
+            cc = clampNumber(cc, 0, c - 1, 0);
+
             if (window.tile_set_pos)
                 window.tile_set_pos(rr, cc);
+
             if (window.tile_apply_start)
                 window.tile_apply_start();
 
