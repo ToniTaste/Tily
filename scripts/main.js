@@ -156,12 +156,20 @@
 }
 
   // ---------- Runner ----------
-  function getDelayMs(){
-    const slider = getEl('timeoutSlider');
-    const v = parseInt(slider?.value ?? "50", 10); // 5..100
-    const ms = Math.round((100 - v) * 2); // rechts=0ms
-    return Math.max(0, ms);
-  }
+  function getDelayMs() {
+  const slider = getEl('timeoutSlider');
+  const v = parseInt(slider?.value ?? "50", 10); // 5..100
+
+  const minDelay = 20;
+  const maxDelay = 1200;
+
+  const t = (100 - v) / 95;
+  const eased = t * t;
+
+  const ms = minDelay + eased * (maxDelay - minDelay);
+
+  return Math.round(ms);
+}
   async function doStep(step) {
   const delay = getDelayMs();
 
